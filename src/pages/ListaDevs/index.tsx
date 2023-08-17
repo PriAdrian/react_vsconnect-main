@@ -1,0 +1,85 @@
+
+import CardDev from "../../components/CardDev"
+import "./style.css"
+import { useEffect, useState } from "react"
+
+import api from "../../utils/api";
+
+export default function ListaDevs() {
+
+    const [devs, setDevs] = useState<any[]>( []);
+
+const [skillDigitada, setSkillDigitada] = useState<string>("");
+
+const [listaDevsFiltrados, setListaDevsFiltrados] = useState<any[]>(devs);
+function buscarPorSkill(event: any) {
+    useEffect( ()=>{},[])
+    event.preventDefault();
+
+    const devsFiltrados = devs.filter((dev: any) => dev.skills.includes(skillDigitada.toLocaleUpperCase()))
+
+
+
+        document.title = "Lista de Devs - VSconnect"
+        listarDesenvolvedores()
+        console.log("teste do useffect")
+    
+    if (devsFiltrados.length === 0) { }
+    alert("Nenhum desenvolvedor(a) com essa skill")
+}else {
+    setListaDevsFiltrados(devsFiltrados)
+}
+function retornoDevsGeral (event: any) {
+    if (event.target.value === "") {
+        setListaDevsFiltrados(devs)
+    }
+    setSkillDigitada(event.target.value)
+}
+
+function listarDesenvolvedores() {
+    api.get("users").then((response: any) =>{
+        console.log(response.data)
+        setDevs(response.data)
+    } )
+
+}
+
+
+return (
+    <main id="lista-devs">
+        <div className="container container_lista_devs">
+            <div className="lista_devs_conteudo">
+                <h1>Lista de Devs</h1>
+                <hr />
+                <form method="post" onsubmit={buscarPorSkill}>
+                    <div className="wrapper_form">
+                        <label htmlFor="busca">Procurar desenvolvedores</label>
+                        <div className="campo-label">
+                            <input type="search" name="campo-busca" id="busca" placeholder="Buscar desenvolvedores por tecnologias..." />
+                            <button type="submit">Buscar</button>
+                        </div>
+                    </div>
+                </form>
+                <div className="wrapper_lista">
+                    <ul>
+                        {devs.map((dev: any,index: number) => {
+                            return <li key={index}>
+                                <CardDev
+                                    foto={dev.user_img}
+                                    nome={dev.nome}
+                                    email={dev.email}
+                                    techs={dev.hardSkills}
+                                />
+                            </li>
+                        }
+                                )}
+
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+)
+}
