@@ -1,111 +1,84 @@
-//importar o css, estilo da pagina
-import { useState } from "react";
-import CardServicos from "../../components/CardServicos";
+import { useEffect, useState } from "react"
+import { CardServicos } from "../../components/CardServicos";
+import api from "../../utils/api";
 import "./style.css"
 
 
-//import das imagens
+export default function ListaServicos() {
 
+    const [servicos, setServicos] = useState<any[]>([])
 
+    const[tituloDigitado, setTituloDigitado] = useState<string>("");
 
+    const[listaVagaFiltrada, setListaVagaFiltrada] = useState<any[]>(servicos);
 
-function listaServicos() {
+    useEffect(() => {
+        document.title = "VSConnect - Lista Servicos"
+        listaDeServicos()
+    }, [])
 
-     //os trem de ts faz aqui ó, nn dentro do return
-   
-     const [servicos, setServicos] = useState<any[]>([]);
-
-
-    const [skillDigitada, setSkillDigitada] = useState<string>("");
-
-    const [listaServicosFiltrados, setListaServicosFiltrados] = useState<any []>(servicos);
-  
-  
-    function buscarPorSkill(event: any){
-  
+    function buscarPorVagas(event: any){
         event.preventDefault();
-  
-        const servicosFiltrados = servicos.filter((servicos: any) => servicos.skills.includes(skillDigitada.toLocaleUpperCase()));
-  
-  
-        if(servicosFiltrados.length === 0){
-          alert("Nenhum Servico com essa Skill foi encontrado!!!");
+
+        const vagaFiltrada = servicos.filter((servico: any) => servico.techs.includes(tituloDigitado.toLocaleUpperCase()));
+
+        if(vagaFiltrada.length === 0 ){
+            alert("Nenhuma vaga encontrada")
         }else{
-          setListaServicosFiltrados(servicosFiltrados);
+            setListaVagaFiltrada(vagaFiltrada)
         }
-  
     }
-  
-  
-    function retornoServicosGeral(event: any){
-  
-      if(event.target.value === ""){
-        setListaServicosFiltrados(servicos);
-      }
-  
-      setSkillDigitada(event.target.value)
-  
+
+    function retornoVagasGeral(event: any){
+        if(event.target.value === ""){
+            setListaVagaFiltrada(servicos)
+        }
+        setTituloDigitado(event.target.value)
+
     }
-  
 
+    function listaDeServicos(){
+        api.get("servicos").then((response: any) => {
+            console.log(response.data)
+            setServicos(response.data)
+            console.log("Cheguei aqui!")
+        })
+    }
 
+    return (
+        <main id="lista-servicos">
+            <div className="container container_lista_servicos">
+                <div className="lista_servicos_conteudo">
+                    <h1>Lista de Serviços</h1>
+                    <hr/>
+                        <form method="post">
+                            <div className="wrapper_form">
+                                <label htmlFor="busca">Procurar serviços</label>
+                                <div className="campo-label">
+                                    <input type="search" name="campo-busca" id="busca" placeholder="Buscar serviços por tecnologias..."/>
+                                        <button type="submit">Buscar</button>
+                                </div>
+                            </div>
+                        </form>
+                        <div className="wrapper_lista">
+                            <ul>
+                                {servicos.map((servico: any, index: number) => {
+                                    return <li key={index}>
+                                       <CardServicos
+                                        titulo={servico.nome}
+                                        valor={servico.valor}
+                                        descricao={servico.descricao}
+                                        techs={servico.techs}
+                                        />     
 
-    return(
-
-        <>
-        
-
-  <main>
-    <div className="container container_lista_servicos">
-      <div className="lista_servicos_conteudo">
-        <h1>Lista de Serviços</h1>
-        <hr />
-        <form method="post" onSubmit={buscarPorSkill}>
-          <div className="wrapper_form">
-            <label htmlFor="busca">Procurar serviços</label>
-            <div className="campo-label">
-              <input
-                type="search"
-                name="campo-busca"
-                id="busca"
-                placeholder="Buscar serviços por tecnologias..."
-                onChange={retornoServicosGeral}
-              />
-              <button type="submit">Buscar</button>
+                                    </li>
+                                }
+                                )}
+                                
+                            </ul>
+                        </div>
+                </div>
             </div>
-          </div>
-        </form>
-        <div className="wrapper_lista">
-          <ul>
-           <li>
-
-            
-          {listaServicosFiltrados.map((servicos: any, index: number) =>{
-
-return <li>
-    <CardServicos
-      titulo={servicos.titulo}
-      preco={servicos.preco}
-      descricao={servicos.descricao}
-      techs={servicos.skills}
-    />
-      </li>
-}
-)}
-
-           </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </main>
-
-        </>
-
-
+        </main>
     )
-
-
 }
-
-export default listaServicos;
